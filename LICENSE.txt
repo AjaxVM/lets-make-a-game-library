@@ -1,0 +1,4 @@
+This game Library is placed into the public domain.
+Please reference it if you make substantial changes or wish to submit it as your own library.
+
+Good luck and have fun coding!
