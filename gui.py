@@ -1,87 +1,253 @@
 import pygame
 from pygame.locals import *
 
+
+key_mappings = {
+    K_UP: 'up',
+    K_DOWN: 'down',
+    K_LEFT: 'left',
+    K_RIGHT: 'right',
+    K_RETURN: 'enter',
+    K_ESCAPE: 'esc',
+    K_SPACE: 'space',
+    K_TAB: 'tab',
+    K_SCROLLOCK: 'scroll_lock',
+    K_SYSREQ: 'print_screen',
+    K_BREAK: 'break',
+    K_DELETE: 'delete',
+    K_BACKSPACE: 'back_space',
+    K_CAPSLOCK: 'caps_lock',
+    K_CLEAR: 'clear',
+    K_NUMLOCK: 'num_lock',
+    
+    K_F1: 'F1',
+    K_F2: 'F2',
+    K_F3: 'F3',
+    K_F4: 'F4',
+    K_F5: 'F5',
+    K_F6: 'F6',
+    K_F7: 'F7',
+    K_F8: 'F8',
+    K_F9: 'F9',
+    K_F10: 'F10',
+    K_F11: 'F11',
+    K_F12: 'F12',
+    K_F13: 'F13',
+    K_F14: 'F14',
+    K_F15: 'F15',
+
+    K_HELP: 'help',
+    K_HOME: 'home',
+    K_END: 'end',
+    K_INSERT: 'insert',
+    K_PRINT: 'print',
+    K_PAGEUP: 'page_up',
+    K_PAGEDOWN: 'page_down',
+    K_FIRST: 'first',
+    K_LAST: 'last',
+
+    K_KP0: 'key_pad_0',
+    K_KP1: 'key_pad_1',
+    K_KP2: 'key_pad_2',
+    K_KP3: 'key_pad_3',
+    K_KP4: 'key_pad_4',
+    K_KP5: 'key_pad_5',
+    K_KP6: 'key_pad_6',
+    K_KP7: 'key_pad_7',
+    K_KP8: 'key_pad_8',
+    K_KP9: 'key_pad_9',
+
+    K_KP_DIVIDE: 'key_pad_divide',
+    K_KP_ENTER: 'key_pad_enter',
+    K_KP_EQUALS: 'key_pad_equals',
+    K_KP_MINUS: 'key_pad_minus',
+    K_KP_MULTIPLY: 'key_pad_multiply',
+    K_KP_PERIOD: 'key_pad_period',
+    K_KP_PLUS: 'key_pad_plus',
+
+    K_LALT: 'left_alt',
+    K_RALT: 'right_alt',
+    K_LCTRL: 'left_control',
+    K_RCTRL: 'right_control',
+    K_LSUPER: 'left_super',
+    K_RSUPER: 'right_super',
+    K_LSHIFT: 'left_shift',
+    K_RSHIFT: 'right_shift',
+    K_LMETA: 'left_meta',
+    K_RMETA: 'right_meta',
+    }
+
+pseudo_key_mappings = {
+    'left_alt': 'p_alt',
+    'right_alt': 'p_alt',
+    'left_control': 'p_control',
+    'right_control': 'p_control',
+    'left_super': 'p_super',
+    'right_super': 'p_super',
+    'left_shift': 'p_shift',
+    'right_shift': 'p_shift',
+    'left_meta': 'p_meta',
+    'right_meta': 'p_meta',
+    'enter': 'p_enter',
+    'key_pad_enter': 'p_enter',
+    }
+
+char_kp_mappings = {
+    K_KP0: '0',
+    K_KP1: '1',
+    K_KP2: '2',
+    K_KP3: '3',
+    K_KP4: '4',
+    K_KP5: '5',
+    K_KP6: '6',
+    K_KP7: '7',
+    K_KP8: '8',
+    K_KP9: '9',
+
+    K_KP_DIVIDE: '/',
+    K_KP_EQUALS: '=',
+    K_KP_MINUS: '-',
+    K_KP_MULTIPLY: '*',
+    K_KP_PERIOD: '.',
+    K_KP_PLUS: '+',
+    }
+
+char_shift_mappings = {
+    '`': '~',
+    '1': '!',
+    '2': '@',
+    '3': '#',
+    '4': '$',
+    '5': '%',
+    '6': '^',
+    '7': '&',
+    '8': '*',
+    '9': '(',
+    '0': ')',
+    '-': '_',
+    '=': '+',
+
+    '[': '{',
+    ']': '}',
+    '\\': '|',
+    ';': ':',
+    "'": '"',
+    ',': '<',
+    '.': '>',
+    '/': '?',
+    }
+
+    
+
 class EventHandler(object):
     def __init__(self):
 
-        self.key_down = {
-            'up': False,
-            'down': False,
-            'left': False,
-            'right': False,
-            'enter': False,
-            'esc': False
-            }
+        self.key_down = {}
+
+        self.chars = ''
+
+        self.caps_on = False #TODO: find initial state of caps lock
 
         self.events = []
 
         self.mouse_x = 0
+        self.mouse_y = 0
 
-        self.bindings = {
-            'up': [],
-            'down': [],
-            'left': [],
-            'right': [],
-            'enter': [],
-            'esc': [],
-            'quit': [],
-            }
+        self.bindings = {}
 
     def add_binding(self, event, function):
+        if not event in self.bindings:
+            self.bindings[event] = []
+
         self.bindings[event].append(function)
 
     def call_binding(self, event):
-        for func in self.bindings[event]:
-            func()
+        if event in self.bindings:
+            for func in self.bindings[event]:
+                func()
+
+    def get_key(self, key):
+        if key in self.key_down:
+            return self.key_down[key]
+        return False
+
+    def get_chars(self):
+        return self.chars
+
+    def convert_char(self, char):
+        if len(char) != 1:
+            return ''
+        caps = self.caps_on
+        shift = 'p_shift' in self.key_down and self.key_down['p_shift']
+
+        if char in char_shift_mappings:
+            if shift:
+                return char_shift_mappings[char]
+            else:
+                return char
+
+        if caps and shift:
+            shift = False
+        elif caps:
+            shift = True
+
+        if shift:
+            return char.upper()
+        return char
 
     def update(self):
         self.events = []
+        self.chars = ""
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 self.events.append('quit')
                 self.call_binding('quit')
 
             if event.type == KEYDOWN:
-                if event.key == K_LEFT:
-                    self.key_down['left'] = True
-                    self.events.append('left')
-                    self.call_binding('left')
-                if event.key == K_RIGHT:
-                    self.key_down['right'] = True
-                    self.events.append('right')
-                    self.call_binding('right')
-                if event.key == K_UP:
-                    self.key_down['up'] = True
-                    self.events.append('up')
-                    self.call_binding('up')
-                if event.key == K_DOWN:
-                    self.key_down['down'] = True
-                    self.events.append('down')
-                    self.call_binding('down')
-                if event.key == K_RETURN:
-                    self.key_down['enter'] = True
-                    self.events.append('enter')
-                    self.call_binding('enter')
-                if event.key == K_ESCAPE:
-                    self.key_down['esc'] = True
-                    self.events.append('esc')
-                    self.call_binding('esc')
+                if event.key == K_CAPSLOCK:
+                    self.caps = not self.caps
+                if event.key in key_mappings:
+                    key = key_mappings[event.key]
+                try:
+                    key = chr(event.key)
+                except:
+                    print 'unknown key:', event.key
+
+                if key in pseudo_key_mappings:
+                    p_key = pseudo_key_mappings[key]
+                else:
+                    p_key = None
+
+                self.key_down[key] = True
+                self.events.append(key)
+                if p_key:
+                    self.key_down[p_key] = True
+                    self.events.append(p_key)
+                self.call_binding(key)
+                self.call_binding(p_key)
 
             if event.type == KEYUP:
-                if event.key == K_LEFT:
-                    self.key_down['left'] = False
-                if event.key == K_RIGHT:
-                    self.key_down['right'] = False
-                if event.key == K_UP:
-                    self.key_down['up'] = False
-                if event.key == K_DOWN:
-                    self.key_down['down'] = False
-                if event.key == K_RETURN:
-                    self.key_down['enter'] = False
-                if event.key == K_ESCAPE:
-                    self.key_down['esc'] = False
+                if event.key in key_mappings:
+                    key = key_mappings[event.key]
+                elif event.unicode:
+                    key = event.unicode
+                else:
+                    print 'unknown key'
 
-        self.mouse_x = pygame.mouse.get_pos()[0]
+                if key in pseudo_key_mappings:
+                    p_key = pseudo_key_mappings[key]
+                else:
+                    p_key = None
+
+                self.key_down[key] = False
+                if p_key:
+                    self.key_down[p_key] = False
+
+        for i in self.key_down:
+            self.chars += self.convert_char(i)
+
+        self.mouse_x, self.mouse_y = pygame.mouse.get_pos()
 
 
 class UIGroup(object):
